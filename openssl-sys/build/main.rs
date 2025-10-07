@@ -317,8 +317,7 @@ fn postprocess(include_dirs: &[PathBuf]) -> Version {
 fn validate_headers(include_dirs: &[PathBuf]) -> Version {
     // NOTE: When building Tauri apps, we update `rules_rust()` to not change the working 
     // directory to the Rust app root (i.e. Cargo.toml). Instead we execute from the the sandbox 
-    // root. In this case we're
-    // Try multiple locations for expando.c to handle both regular builds and Bazel builds
+    // root.
     let manifest_dir = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
     let mut expando_path = manifest_dir.join("build/expando.c");
 

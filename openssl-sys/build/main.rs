@@ -308,7 +308,7 @@ fn validate_headers(include_dirs: &[PathBuf]) -> Version {
     // directory to the Rust app root (i.e. Cargo.toml). Instead we execute from the the sandbox 
     // root.
     let manifest_dir = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
-    let mut expando_path = manifest_dir.join("build/expando.c");
+    let expando_path = manifest_dir.join("build/expando.c");
 
     // This `*-sys` crate only works with OpenSSL 1.0.1, 1.0.2, 1.1.0, 1.1.1 and 3.0.0.
     // To correctly expose the right API from this crate, take a look at

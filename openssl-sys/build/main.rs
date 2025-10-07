@@ -322,10 +322,7 @@ fn validate_headers(include_dirs: &[PathBuf]) -> Version {
     // file of OpenSSL, `opensslconf.h`, and then dump out everything it defines
     // as our own #[cfg] directives. That way the `ossl10x.rs` bindings can
     // account for compile differences and such.
-    println!("cargo:rerun-if-changed=build/expando.c");
-    let lib_path =
-        PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
-    
+    println!("cargo:rerun-if-changed=build/expando.c");    
     let mut gcc = cc::Build::new();
     gcc.includes(include_dirs);
     let expanded = match gcc.file(expando_path).try_expand() {

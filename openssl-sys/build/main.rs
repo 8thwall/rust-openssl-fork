@@ -213,6 +213,17 @@ fn main() {
     }
     println!("cargo:include={}", include_dir.to_string_lossy());
 
+    // let target = env::var("TARGET").unwrap();
+    // let (lib_dirs, include_dir) = find_openssl(&target);
+
+    // let version =  if target.contains("android") {
+    //     println!("cargo:rustc-cfg=openssl");
+    //     println!("cargo:version=111"); // Assume a reasonable OpenSSL version
+    //     Version::Openssl11x
+    // } else {
+    //     postprocess(&[include_dir])
+    // };
+
     let version = postprocess(&[include_dir]);
 
     let libs_env = env("OPENSSL_LIBS");
@@ -304,6 +315,13 @@ fn postprocess(include_dirs: &[PathBuf]) -> Version {
 /// version string of OpenSSL.
 #[allow(clippy::unusual_byte_groupings)]
 fn validate_headers(include_dirs: &[PathBuf]) -> Version {
+    // NOTE: When building Tauri apps, we update `rules_rust()` to not change the working 
+    // directory to the Rust app root (i.e. Cargo.toml). Instead we execute from the the sandbox 
+    // root. In this case we're
+    // Try multiple locations for expando.c to handle both regular builds and Bazel builds
+    let manifest_dir = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
+    let mut expando_path = manifest_dir.join("build/expando.c");
+
     // This `*-sys` crate only works with OpenSSL 1.0.1, 1.0.2, 1.1.0, 1.1.1 and 3.0.0.
     // To correctly expose the right API from this crate, take a look at
     // `opensslv.h` to see what version OpenSSL claims to be.
@@ -316,10 +334,12 @@ fn validate_headers(include_dirs: &[PathBuf]) -> Version {
     // file of OpenSSL, `opensslconf.h`, and then dump out everything it defines
     // as our own #[cfg] directives. That way the `ossl10x.rs` bindings can
     // account for compile differences and such.
-    println!("cargo:rerun-if-changed=build/expando.c");
+    let lib_path =
+        PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
+    
     let mut gcc = cc::Build::new();
     gcc.includes(include_dirs);
-    let expanded = match gcc.file("build/expando.c").try_expand() {
+    let expanded = match gcc.file(expando_path).try_expand() {
         Ok(expanded) => expanded,
         Err(e) => {
             panic!(

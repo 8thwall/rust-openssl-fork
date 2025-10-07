@@ -213,17 +213,6 @@ fn main() {
     }
     println!("cargo:include={}", include_dir.to_string_lossy());
 
-    // let target = env::var("TARGET").unwrap();
-    // let (lib_dirs, include_dir) = find_openssl(&target);
-
-    // let version =  if target.contains("android") {
-    //     println!("cargo:rustc-cfg=openssl");
-    //     println!("cargo:version=111"); // Assume a reasonable OpenSSL version
-    //     Version::Openssl11x
-    // } else {
-    //     postprocess(&[include_dir])
-    // };
-
     let version = postprocess(&[include_dir]);
 
     let libs_env = env("OPENSSL_LIBS");
